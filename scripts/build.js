@@ -14,12 +14,18 @@ const isCF = !insideOpenNext && (
   || !!process.env.CF_ACCOUNT_ID
 );
 
+const command = isCF
+  ? require.resolve('@opennextjs/cloudflare/dist/cli/index.js')
+  : require.resolve('next/dist/bin/next');
 const args = isCF
-  ? ['opennextjs-cloudflare', 'build', '--dangerouslyUseUnsupportedNextVersion']
-  : ['next', 'build'];
+  ? ['build', '--dangerouslyUseUnsupportedNextVersion']
+  : ['build'];
 
 console.log(`[build] 平台: ${isCF ? 'Cloudflare Workers (OpenNext)' : 'Next.js 标准构建'}${insideOpenNext ? ' (OpenNext 内部)' : ''}`);
-const r = spawnSync('bun', ['run', ...args], { stdio: 'inherit', shell: false });
+const r = spawnSync(process.execPath, [command, ...args], {
+  stdio: 'inherit',
+  shell: false,
+});
 if (r.status !== 0) {
   console.error(`[build] 失败 (exit ${r.status})`);
   process.exit(r.status ?? 1);
